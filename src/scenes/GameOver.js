@@ -89,34 +89,27 @@ export class GameOver extends Scene
             ball6.on('pointerdown', () => this.selectedBall(6));
         }
 
-        //  Send the score to YouTube
-        YouTubePlayables.sendScore(this.registry.get('score'));
+        if (window.ytgame) {
+            //  Send the score to YouTube
+            try {
+                window.ytgame.engagement.sendScore({ value: this.registry.get('scr') });
+            } catch(e) {}
 
-        //  you can also do:
-        // ytgame?.engagement.sendScore({ value: this.registry.get('score') });
-    }
+            const gameData = {
+                lvl: this.registry.get('lvl'),
+                scr: this.registry.get('scr')
+            };
 
-    selectedBall (ball)
-    {
-        this.registry.set('activeBall', `ball${ball}`);
+            //  Save the data to YouTube
+            try {
+                window.ytgame.game.saveData(JSON.stringify(gameData));
+            } catch(e) {}
+        }
 
-        const gameData = {
-            activeBall: `ball${ball}`,
-            ball1: this.registry.get('ball1'),
-            ball2: this.registry.get('ball2'),
-            ball3: this.registry.get('ball3'),
-            ball4: this.registry.get('ball4'),
-            ball5: this.registry.get('ball5'),
-            ball6: this.registry.get('ball6')
-        };
-
-        //  Save the data to YouTube
-        YouTubePlayables.saveData(gameData);
-
-        //  you can also do:
-        // ytgame?.game.saveData(string);
-
-        this.scene.stop('GameBackground');
-        this.scene.start('MainMenu');
+        // Start next level or menu on interaction
+        this.input.once('pointerdown', () => {
+            this.scene.stop('GameBackground');
+            this.scene.start('MainMenu');
+        });
     }
 }

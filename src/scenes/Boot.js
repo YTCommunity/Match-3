@@ -25,48 +25,47 @@ export class Boot extends Scene
 
         try
         {
-            const data = await YouTubePlayables.withTimeout(YouTubePlayables.loadData(), 1000);
-
-            //  You can also call: ytgame.game.loadData()
-
-            //  'data' will contain the parsed JSON data from the Playables loadData call.
-            //  You can now store it into the Phaser Registry, or elsewhere.
-            //  Or it will be null/undefined if no data was present.
+            // Use ytgame directly for data persistence as requested
+            let data = {};
+            if (window.ytgame) {
+                const rawdata = await window.ytgame.game.loadData();
+                if (rawdata) {
+                    data = JSON.parse(rawdata);
+                }
+            }
 
             console.log('loadData() result', data);
 
-            this.registry.set('ball1', Phaser.Utils.Objects.GetFastValue(data, 'ball1', true));
-            this.registry.set('ball2', Phaser.Utils.Objects.GetFastValue(data, 'ball2', false));
-            this.registry.set('ball3', Phaser.Utils.Objects.GetFastValue(data, 'ball3', false));
-            this.registry.set('ball4', Phaser.Utils.Objects.GetFastValue(data, 'ball4', false));
-            this.registry.set('ball5', Phaser.Utils.Objects.GetFastValue(data, 'ball5', false));
-            this.registry.set('ball6', Phaser.Utils.Objects.GetFastValue(data, 'ball6', false));
-
-            this.registry.set('activeBall', Phaser.Utils.Objects.GetFastValue(data, 'activeBall', 'ball1'));
+            this.registry.set('lvl', Phaser.Utils.Objects.GetFastValue(data, 'lvl', 1));
+            this.registry.set('scr', Phaser.Utils.Objects.GetFastValue(data, 'scr', 0));
         }
         catch (error)
         {
             console.error(error);
         }
 
-        //  We are now going to define our game pause and resume handlers.
-        //  This is going to pause the entire Phaser game when the YouTube Playables API tells us to.
+        if (window.ytgame) {
+            // Strictly handle system interrupts directly via ytgame
+            window.ytgame.system.onPause(() => {
+                console.log('YouTube Playables API has requested game pause');
+                this.game.pause();
+            });
 
-        YouTubePlayables.setOnPause(() => {
+            window.ytgame.system.onResume(() => {
+                console.log('YouTube Playables API has requested game resume');
+                this.game.resume();
+            });
 
-            console.log('YouTube Playables API has requested game pause');
+            // Set up audio change listener directly via ytgame
+            window.ytgame.system.onAudioEnabledChange((enabled) => {
+                console.log('YouTube Playables API has requested audio change', enabled);
+                this.sound.setMute(!enabled);
+            });
 
-            this.game.pause();
-
-        });
-
-        YouTubePlayables.setOnResume(() => {
-
-            console.log('YouTube Playables API has requested game resume');
-
-            this.game.resume();
-
-        });
+            // Initially check if audio is enabled via ytgame
+            const isAudioEnabled = window.ytgame.system.isAudioEnabled();
+            this.sound.setMute(!isAudioEnabled);
+        }
 
         this.scene.start('Preloader');
     }
