@@ -17,7 +17,7 @@ const phasermsg = () => {
 }   
 
 export default defineConfig({
-    base: './',
+    base: '/Match-3/',
     logLevel: 'warning',
     build: {
         rollupOptions: {

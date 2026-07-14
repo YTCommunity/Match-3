@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    base: './',
+    base: '/Match-3/',
     build: {
         rollupOptions: {
             output: {
