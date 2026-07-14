@@ -5,6 +5,12 @@ export const SDKErrorType = Object.freeze({
     SIZE_LIMIT_EXCEEDED: 'SIZE_LIMIT_EXCEEDED'
 });
 
+//  Find lone high surrogates (D800-DBFF) not followed by a low surrogate (DC00-DFFF)
+const loneHighSurrogate = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])/;
+
+//  Find lone low surrogates (DC00-DFFF) not preceded by a high surrogate (D800-DBFF)
+const loneLowSurrogate = /(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
 export const YouTubePlayables = {
 
     //  https://developers.google.com/youtube/gaming/playables/reference/sdk#sdk_version
@@ -227,12 +233,6 @@ export const YouTubePlayables = {
 
     hasLoneSurrogates: function (str)
     {
-        //  Find lone high surrogates (D800-DBFF) not followed by a low surrogate (DC00-DFFF)
-        const loneHighSurrogate = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])/;
-
-        //  Find lone low surrogates (DC00-DFFF) not preceded by a high surrogate (D800-DBFF)
-        const loneLowSurrogate = /(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
-        
         return loneHighSurrogate.test(str) || loneLowSurrogate.test(str);
     },
 
