@@ -11,12 +11,6 @@ export class Preloader extends Scene
     init ()
     {
         this.createLoadingBar();
-
-        //  Now we have displayed all of our loader graphics, we need to tell the YouTube Playables API that we are first-frame ready:
-        YouTubePlayables.firstFrameReady();
-
-        //  You can also do this by calling:
-        // ytgame?.game.firstFrameReady();
     }
 
     preload ()
@@ -89,5 +83,8 @@ export class Preloader extends Scene
             bar.width = barWidth * progress;
 
         });
+
+        //  Now we have displayed all of our loader graphics, we need to tell the YouTube Playables API that we are first-frame ready:
+        YouTubePlayables.firstFrameReady();
     }
 }
