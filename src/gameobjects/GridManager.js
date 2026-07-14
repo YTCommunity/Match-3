@@ -90,6 +90,62 @@ export default class GridManager {
         return false;
     }
 
+    swap(r1, c1, r2, c2) {
+        let temp = this.grid[r1][c1];
+        this.grid[r1][c1] = this.grid[r2][c2];
+        this.grid[r2][c2] = temp;
+    }
+
+    findAllMatches() {
+        let matchedCells = [];
+
+        // Check horizontal matches
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols - 2; c++) {
+                let type1 = this.grid[r][c];
+                if (type1 !== null && type1 !== undefined) {
+                    let matchLength = 1;
+                    while (c + matchLength < this.cols && this.grid[r][c + matchLength] === type1) {
+                        matchLength++;
+                    }
+                    if (matchLength >= 3) {
+                        for (let k = 0; k < matchLength; k++) {
+                            matchedCells.push({ row: r, col: c + k });
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check vertical matches
+        for (let c = 0; c < this.cols; c++) {
+            for (let r = 0; r < this.rows - 2; r++) {
+                let type1 = this.grid[r][c];
+                if (type1 !== null && type1 !== undefined) {
+                    let matchLength = 1;
+                    while (r + matchLength < this.rows && this.grid[r + matchLength][c] === type1) {
+                        matchLength++;
+                    }
+                    if (matchLength >= 3) {
+                        for (let k = 0; k < matchLength; k++) {
+                            matchedCells.push({ row: r + k, col: c });
+                        }
+                    }
+                }
+            }
+        }
+
+        // Remove duplicates
+        let uniqueMatches = [];
+        matchedCells.forEach(cell => {
+            if (!uniqueMatches.find(m => m.row === cell.row && m.col === cell.col)) {
+                uniqueMatches.push(cell);
+            }
+        });
+
+        return uniqueMatches;
+    }
+
     checkMatchesAt(row, col) {
         let type = this.grid[row][col];
         if (type === null || type === undefined) return false;
