@@ -1,6 +1,10 @@
 export default class GridManager {
     constructor(numTypes = 6) {
-        this.grid = [];
+        this.grid = Array.from({ length: 12 }, () => Array(12).fill(null));
+        this.matchedCells = Array.from({ length: 144 }, () => ({ row: 0, col: 0 }));
+        this.uniqueMatches = Array.from({ length: 144 }, () => ({ row: 0, col: 0 }));
+        this.matchedCellsCount = 0;
+        this.uniqueMatchesCount = 0;
         this.rows = 0;
         this.cols = 0;
         this.numTypes = numTypes;
@@ -9,10 +13,8 @@ export default class GridManager {
     generateGrid(rows, cols) {
         this.rows = rows;
         this.cols = cols;
-        this.grid = [];
 
         for (let i = 0; i < rows; i++) {
-            this.grid[i] = [];
             for (let j = 0; j < cols; j++) {
                 let isValid = false;
                 let type;
@@ -97,7 +99,8 @@ export default class GridManager {
     }
 
     findAllMatches() {
-        let matchedCells = [];
+        this.matchedCellsCount = 0;
+        this.uniqueMatchesCount = 0;
 
         // Check horizontal matches
         for (let r = 0; r < this.rows; r++) {
@@ -110,7 +113,11 @@ export default class GridManager {
                     }
                     if (matchLength >= 3) {
                         for (let k = 0; k < matchLength; k++) {
-                            matchedCells.push({ row: r, col: c + k });
+                            if (this.matchedCellsCount < this.matchedCells.length) {
+                                this.matchedCells[this.matchedCellsCount].row = r;
+                                this.matchedCells[this.matchedCellsCount].col = c + k;
+                                this.matchedCellsCount++;
+                            }
                         }
                     }
                 }
@@ -128,22 +135,37 @@ export default class GridManager {
                     }
                     if (matchLength >= 3) {
                         for (let k = 0; k < matchLength; k++) {
-                            matchedCells.push({ row: r + k, col: c });
+                            if (this.matchedCellsCount < this.matchedCells.length) {
+                                this.matchedCells[this.matchedCellsCount].row = r + k;
+                                this.matchedCells[this.matchedCellsCount].col = c;
+                                this.matchedCellsCount++;
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Remove duplicates
-        let uniqueMatches = [];
-        matchedCells.forEach(cell => {
-            if (!uniqueMatches.find(m => m.row === cell.row && m.col === cell.col)) {
-                uniqueMatches.push(cell);
-            }
-        });
+        // Remove duplicates manually
+        for (let i = 0; i < this.matchedCellsCount; i++) {
+            let cell = this.matchedCells[i];
+            let isDuplicate = false;
 
-        return uniqueMatches;
+            for (let j = 0; j < this.uniqueMatchesCount; j++) {
+                if (this.uniqueMatches[j].row === cell.row && this.uniqueMatches[j].col === cell.col) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (!isDuplicate && this.uniqueMatchesCount < this.uniqueMatches.length) {
+                this.uniqueMatches[this.uniqueMatchesCount].row = cell.row;
+                this.uniqueMatches[this.uniqueMatchesCount].col = cell.col;
+                this.uniqueMatchesCount++;
+            }
+        }
+
+        return { matches: this.uniqueMatches, count: this.uniqueMatchesCount };
     }
 
     checkMatchesAt(row, col) {

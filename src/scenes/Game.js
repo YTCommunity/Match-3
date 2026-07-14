@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import GridManager from '../gameobjects/GridManager';
+import { YouTubePlayables } from '../YouTubePlayables';
 
 export class Game extends Scene
 {
@@ -13,6 +14,21 @@ export class Game extends Scene
         this.scene.launch('GameBackground');
         this.scene.bringToTop();
 
+        // Generate halal vector graphics for tokens
+        this.generateTokenGraphics();
+
+        // Pre-allocate object pool for tokens
+        this.tokenPool = [];
+        for (let i = 0; i < 128; i++) {
+            const token = this.add.image(0, 0, 'token1');
+            token.setActive(false);
+            token.setVisible(false);
+            this.tokenPool.push(token);
+        }
+
+        // Notify YouTube Playables immediately
+        YouTubePlayables.gameReady();
+
         // Instantiate GridManager
         this.gridManager = new GridManager(6); // 6 tile types
         this.gridManager.generateGrid(8, 8); // 8x8 grid
@@ -24,6 +40,91 @@ export class Game extends Scene
 
         // Render the generated tiles onto the screen
         this.renderGrid();
+    }
+
+    generateTokenGraphics() {
+        const graphics = this.make.graphics();
+        const size = 64;
+        const half = size / 2;
+
+        // Token 1: Red Cross
+        graphics.clear();
+        graphics.fillStyle(0xff0000, 1);
+        graphics.fillRect(half - 10, 10, 20, size - 20);
+        graphics.fillRect(10, half - 10, size - 20, 20);
+        graphics.generateTexture('token1', size, size);
+
+        // Token 2: Blue Water Droplet (approximated with a circle and triangle)
+        graphics.clear();
+        graphics.fillStyle(0x0088ff, 1);
+        graphics.fillCircle(half, half + 10, 20);
+        graphics.fillTriangle(half, 10, half - 20, half + 10, half + 20, half + 10);
+        graphics.generateTexture('token2', size, size);
+
+        // Token 3: Yellow Energy Bolt
+        graphics.clear();
+        graphics.fillStyle(0xffcc00, 1);
+        graphics.beginPath();
+        graphics.moveTo(half + 10, 10);
+        graphics.lineTo(15, half + 5);
+        graphics.lineTo(half, half + 5);
+        graphics.lineTo(half - 10, size - 10);
+        graphics.lineTo(size - 15, half - 5);
+        graphics.lineTo(half, half - 5);
+        graphics.closePath();
+        graphics.fillPath();
+        graphics.generateTexture('token3', size, size);
+
+        // Token 4: Green Diamond
+        graphics.clear();
+        graphics.fillStyle(0x00cc00, 1);
+        graphics.beginPath();
+        graphics.moveTo(half, 10);
+        graphics.lineTo(size - 10, half);
+        graphics.lineTo(half, size - 10);
+        graphics.lineTo(10, half);
+        graphics.closePath();
+        graphics.fillPath();
+        graphics.generateTexture('token4', size, size);
+
+        // Token 5: Purple Circle
+        graphics.clear();
+        graphics.fillStyle(0xaa00cc, 1);
+        graphics.fillCircle(half, half, 22);
+        graphics.generateTexture('token5', size, size);
+
+        // Token 6: Orange Square
+        graphics.clear();
+        graphics.fillStyle(0xff6600, 1);
+        graphics.fillRect(12, 12, size - 24, size - 24);
+        graphics.generateTexture('token6', size, size);
+
+        graphics.destroy();
+    }
+
+    getFreeToken(type, x, y) {
+        for (let i = 0; i < this.tokenPool.length; i++) {
+            const token = this.tokenPool[i];
+            if (!token.active) {
+                token.setTexture('token' + type);
+                token.setPosition(x, y);
+                token.setActive(true);
+                token.setVisible(true);
+                token.setAlpha(1);
+                token.setScale(1);
+                return token;
+            }
+        }
+        // Fallback if pool exhausted (shouldn't happen with 128 tokens for 8x8 grid)
+        return this.add.image(x, y, 'token' + type);
+    }
+
+    releaseToken(sprite) {
+        if (sprite) {
+            sprite.setActive(false);
+            sprite.setVisible(false);
+            this.tweens.killTweensOf(sprite);
+        }
     }
 
     renderGrid()
@@ -40,10 +141,11 @@ export class Game extends Scene
                 const x = this.offsetX + col * this.tileSize;
                 const y = this.offsetY + row * this.tileSize;
 
-                const tile = this.add.image(x, y, 'assets', 'ball' + type);
+                const tile = this.getFreeToken(type, x, y);
                 tile.setDisplaySize(this.tileSize - 4, this.tileSize - 4);
                 tile.setInteractive();
 
+                tile.removeAllListeners('pointerdown');
                 tile.on('pointerdown', () => this.handleTileClick(row, col));
 
                 this.tileSprites[row][col] = tile;
@@ -129,21 +231,22 @@ export class Game extends Scene
     }
 
     resolveMatches(r1 = null, c1 = null, r2 = null, c2 = null) {
-        const matches = this.gridManager.findAllMatches();
+        const matchData = this.gridManager.findAllMatches();
 
-        if (matches.length > 0) {
+        if (matchData.count > 0) {
             this.isAnimating = true;
 
             let tweensCompleted = 0;
             const onComplete = () => {
                 tweensCompleted++;
-                if (tweensCompleted === matches.length) {
+                if (tweensCompleted === matchData.count) {
                     this.isAnimating = false;
                     this.applyGravity();
                 }
             };
 
-            matches.forEach(match => {
+            for (let i = 0; i < matchData.count; i++) {
+                const match = matchData.matches[i];
                 const r = match.row;
                 const c = match.col;
                 const sprite = this.tileSprites[r][c];
@@ -159,14 +262,14 @@ export class Game extends Scene
                         scaleY: 0,
                         duration: 200,
                         onComplete: () => {
-                            sprite.destroy();
+                            this.releaseToken(sprite);
                             onComplete();
                         }
                     });
                 } else {
                     onComplete(); // If sprite is already gone, just count it
                 }
-            });
+            }
         } else if (r1 !== null && c1 !== null && r2 !== null && c2 !== null) {
             // No matches found after a user swap, swap back
             this.swapTiles(r2, c2, r1, c1, true); // true indicates a revert swap
@@ -234,9 +337,10 @@ export class Game extends Scene
                     const finalY = this.offsetY + row * this.tileSize;
                     const startY = this.offsetY - (this.gridManager.rows * this.tileSize); // Start way above
 
-                    const tile = this.add.image(x, startY, 'assets', 'ball' + type);
+                    const tile = this.getFreeToken(type, x, startY);
                     tile.setDisplaySize(this.tileSize - 4, this.tileSize - 4);
                     tile.setInteractive();
+                    tile.removeAllListeners('pointerdown');
                     tile.on('pointerdown', () => this.handleTileClick(row, col));
 
                     this.tileSprites[row][col] = tile;

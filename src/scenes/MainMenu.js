@@ -35,13 +35,17 @@ export class MainMenu extends Scene
     {
         const view = this.scale.getViewPort(this.cameras.main);
 
-        const logo = this.add.image(view.centerX, 260, 'assets', 'game-logo');
-        
-        logo.preFX.addShine(0.8, 1, 5);
+        this.add.text(view.centerX, 260, "HALAL MATCH 3", {
+            fontFamily: 'Arial Black', fontSize: 60, color: '#ffffff',
+            stroke: '#000000', strokeThickness: 8,
+            align: 'center'
+        }).setOrigin(0.5);
 
-        this.add.image(view.centerX, view.centerY, 'assets', 'logo');
-
-        this.add.image(view.centerX, view.centerY + 190, 'assets', 'youtube-logo');
+        this.add.text(view.centerX, view.centerY, "Tap to Start", {
+            fontFamily: 'Arial Black', fontSize: 40, color: '#00ff00',
+            stroke: '#000000', strokeThickness: 6,
+            align: 'center'
+        }).setOrigin(0.5);
     }
 
     async createText ()

@@ -33,61 +33,30 @@ export class GameOver extends Scene
             align: 'center'
         }).setOrigin(0.5);
 
-        //  Show the selection of 6 basketballs
-        const ball1 = this.add.image(cx - 100, cy - 30, 'assets', 'ball-locked');
-        const ball2 = this.add.image(cx, cy - 30, 'assets', 'ball-locked');
-        const ball3 = this.add.image(cx + 100, cy - 30, 'assets', 'ball-locked');
-        const ball4 = this.add.image(cx - 100, cy + 70, 'assets', 'ball-locked');
-        const ball5 = this.add.image(cx, cy + 70, 'assets', 'ball-locked');
-        const ball6 = this.add.image(cx + 100, cy + 70, 'assets', 'ball-locked');
+        const createToken = (x, y, i, isUnlocked) => {
+            const rect = this.add.rectangle(x, y, 64, 64, isUnlocked ? 0x00ff00 : 0x555555).setInteractive();
+            this.add.text(x, y, isUnlocked ? `T${i}` : 'L', {
+                fontFamily: 'Arial Black', fontSize: 24, color: '#ffffff'
+            }).setOrigin(0.5);
 
-        this.add.text(cx, cy + 220, `Score Super Shots to unlock more!`, {
+            if (isUnlocked) {
+                rect.on('pointerdown', () => this.selectedBall(i));
+            }
+        };
+
+        //  Show the selection of 6 tokens
+        createToken(cx - 100, cy - 30, 1, this.registry.get('ball1'));
+        createToken(cx, cy - 30, 2, this.registry.get('ball2'));
+        createToken(cx + 100, cy - 30, 3, this.registry.get('ball3'));
+        createToken(cx - 100, cy + 70, 4, this.registry.get('ball4'));
+        createToken(cx, cy + 70, 5, this.registry.get('ball5'));
+        createToken(cx + 100, cy + 70, 6, this.registry.get('ball6'));
+
+        this.add.text(cx, cy + 220, `Score more to unlock tokens!`, {
             fontFamily: 'Arial Black', fontSize: 24, color: '#ffffff',
             stroke: '#000000', strokeThickness: 6,
             align: 'center'
         }).setOrigin(0.5);
-
-        if (this.registry.get('ball1'))
-        {
-            ball1.setFrame('ball1');
-            ball1.setInteractive();
-            ball1.on('pointerdown', () => this.selectedBall(1));
-        }
-
-        if (this.registry.get('ball2'))
-        {
-            ball2.setFrame('ball2');
-            ball2.setInteractive();
-            ball2.on('pointerdown', () => this.selectedBall(2));
-        }
-
-        if (this.registry.get('ball3'))
-        {
-            ball3.setFrame('ball3');
-            ball3.setInteractive();
-            ball3.on('pointerdown', () => this.selectedBall(3));
-        }
-
-        if (this.registry.get('ball4'))
-        {
-            ball4.setFrame('ball4');
-            ball4.setInteractive();
-            ball4.on('pointerdown', () => this.selectedBall(4));
-        }
-
-        if (this.registry.get('ball5'))
-        {
-            ball5.setFrame('ball5');
-            ball5.setInteractive();
-            ball5.on('pointerdown', () => this.selectedBall(5));
-        }
-
-        if (this.registry.get('ball6'))
-        {
-            ball6.setFrame('ball6');
-            ball6.setInteractive();
-            ball6.on('pointerdown', () => this.selectedBall(6));
-        }
 
         //  Send the score to YouTube
         YouTubePlayables.sendScore(this.registry.get('score'));
