@@ -22,8 +22,53 @@ export class Game extends Scene
             this.gridManager.generateGrid(8, 8);
         }
 
+        // Initialize moves
+        this.moves = 20;
+
         // Render the generated tiles onto the screen
         this.renderGrid();
+
+        // Add rewarded ad button
+        this.createRewardedAdButton();
+    }
+
+    createRewardedAdButton()
+    {
+        const btn = this.add.text(10, 10, 'Watch Ad: +5 Moves', {
+            fontFamily: 'Arial',
+            fontSize: '24px',
+            color: '#ffffff',
+            backgroundColor: '#0000ff',
+            padding: { x: 10, y: 10 }
+        });
+
+        btn.setInteractive();
+
+        btn.on('pointerdown', async () => {
+            if (window.ytgame && window.ytgame.ads) {
+                // Pause the game loop
+                this.game.pause();
+
+                try {
+                    // Request the rewarded ad
+                    const success = await window.ytgame.ads.requestRewardedAd('extra-moves-5');
+
+                    if (success) {
+                        this.moves += 5;
+                        console.log('Ad watched successfully! +5 Moves. Total:', this.moves);
+                    } else {
+                        console.log('Ad not watched.');
+                    }
+                } catch (error) {
+                    console.error('Error requesting rewarded ad:', error);
+                } finally {
+                    // Resume the game loop regardless of outcome
+                    this.game.resume();
+                }
+            } else {
+                console.log('YouTube Playables ads API not available.');
+            }
+        });
     }
 
     renderGrid()
