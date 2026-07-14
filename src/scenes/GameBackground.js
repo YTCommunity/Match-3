@@ -11,7 +11,7 @@ export class GameBackground extends Scene
     {
         const view = this.scale.getViewPort();
 
-        this.bg = this.add.image(0, 0, 'gameBackground');
+        this.bg = this.add.rectangle(0, 0, view.width, view.height, 0x222222);
 
         this.bg.setOrigin(0, 0);
         this.bg.setDisplaySize(view.width, view.height);

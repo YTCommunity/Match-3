@@ -16,12 +16,6 @@ export class Preloader extends Scene
     preload ()
     {
         //  Load the assets for the game - Replace with your own assets
-        this.load.setPath('assets');
-
-        this.load.image('gameBackground', 'game-background.png');
-        this.load.image('basket', 'basket.png');
-        this.load.atlas('assets', 'basket-shoot-out.png', 'basket-shoot-out.json');
-        this.load.spritesheet('hands', 'hands.png', { frameWidth: 190, frameHeight: 300 });
 
         //  Audio from:
         //  https://opengameart.org/content/sfxthrow
@@ -38,17 +32,6 @@ export class Preloader extends Scene
 
     create ()
     {
-        //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-        //  For example, you can define global animations here, so we can use them in other scenes.
-
-        this.anims.create({
-            key: 'tapToStart',
-            frames: this.anims.generateFrameNumbers('hands', { start: 0, end: 1 }),
-            frameRate: 6,
-            repeat: -1,
-            repeatDelay: 500
-        });
-
         //  Launch our UI Scene
         this.scene.launch('UI');
 
@@ -61,8 +44,7 @@ export class Preloader extends Scene
         const width = this.scale.width;
         const height = this.scale.height;
 
-        //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(0, 0, 'background').setOrigin(0, 0).setDisplaySize(width, height);
+        this.add.rectangle(0, 0, width, height, 0x111111).setOrigin(0, 0);
 
         const cx = width / 2;
         const cy = height / 2;
