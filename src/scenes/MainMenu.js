@@ -20,18 +20,15 @@ export class MainMenu extends Scene
 
         });
 
-        //  Our game is now ready to be interacted with,
-        //  so we have to notify the YouTube Playables API about this:
-        YouTubePlayables.gameReady();
-
-        //  You can also do this by calling:
-        // ytgame?.game.gameReady();
-
         //  Launch our animated background Scene
         this.scene.launch('Background');
 
         //  Bring our UI Scene to the top
         this.scene.bringToTop('UI');
+
+        //  Our game is now ready to be interacted with,
+        //  so we have to notify the YouTube Playables API about this:
+        YouTubePlayables.gameReady();
     }
 
     createLogos ()
