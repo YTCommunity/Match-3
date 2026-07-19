@@ -35,8 +35,8 @@ YouTubePlayables.boot(() => {
             Boot,
             Preloader,
             Background,
-            MainMenu,
             Game,
+            MainMenu,
             GameBackground,
             GameOver,
             UI
