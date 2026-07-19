@@ -35,14 +35,14 @@ export class MainMenu extends Scene
     {
         const view = this.scale.getViewPort(this.cameras.main);
 
-        this.add.text(view.centerX, 260, "HALAL MATCH 3", {
+        this.add.text(view.centerX, 260, "ARACHNID RUNNER", {
             fontFamily: 'Arial Black', fontSize: 60, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8,
             align: 'center'
         }).setOrigin(0.5);
 
         this.add.text(view.centerX, view.centerY, "Tap to Start", {
-            fontFamily: 'Arial Black', fontSize: 40, color: '#00ff00',
+            fontFamily: 'Arial Black', fontSize: 40, color: '#ff0000',
             stroke: '#000000', strokeThickness: 6,
             align: 'center'
         }).setOrigin(0.5);
