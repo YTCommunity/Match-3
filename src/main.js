@@ -6,7 +6,6 @@ import { GameOver } from './scenes/GameOver';
 import { MainMenu } from './scenes/MainMenu';
 import { Preloader } from './scenes/Preloader';
 import { UI } from './scenes/UI';
-import { ActionPhase } from './scenes/ActionPhase';
 import { YouTubePlayables } from './YouTubePlayables';
 
 //  Calling YouTubePlayables.boot will wait until the document has loaded
@@ -26,13 +25,9 @@ YouTubePlayables.boot(() => {
             mode: Phaser.Scale.EXPAND
         },
         physics: {
-            default: 'matter',
-            matter: {
-                positionIterations: 12,
-                velocityIterations: 8,
-                gravity: {
-                    y: 1.6
-                },
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 },
                 debug: false
             }
         },
@@ -42,7 +37,6 @@ YouTubePlayables.boot(() => {
             Background,
             MainMenu,
             Game,
-            ActionPhase,
             GameBackground,
             GameOver,
             UI
